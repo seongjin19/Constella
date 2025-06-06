@@ -1,0 +1,13 @@
+train: C:/Users/psaej/PycharmProjects/Constella/Constellation/train/images
+val: C:/Users/psaej/PycharmProjects/Constella/Constellation/valid/images
+test: C:/Users/psaej/PycharmProjects/Constella/Constellation/test/images
+
+nc: 16
+names: ['aquila', 'bootes', 'canis_major', 'canis_minor', 'cassiopeia', 'cygnus', 'gemini', 'leo', 'lyra', 'moon', 'orion', 'pleiades', 'sagittarius', 'scorpius', 'taurus', 'ursa_major']
+
+roboflow:
+  workspace: project
+  project: constellation-dsphi
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/project/constellation-dsphi/dataset/1

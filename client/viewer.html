@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Constella 3D Viewer</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: black; }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+  <!-- Three.js 라이브러리 로드 -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/examples/js/controls/OrbitControls.js"></script>
+
+  <script>
+    // 🌌 씬/카메라/렌더러 기본 설정
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    camera.position.z = 0.1;  // 사용자 위치 (구 안쪽에서 바깥 별을 봄)
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // 🌀 카메라 컨트롤
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.rotateSpeed = 0.4;
+    controls.enableZoom = false;
+
+    // 🧭 좌표 변환 함수: RA/Dec → 카르테시안
+    function raDecToCartesian(ra, dec, radius = 100) {
+      const raRad = ra / 24 * 2 * Math.PI;
+      const decRad = dec * Math.PI / 180;
+      const x = radius * Math.cos(decRad) * Math.cos(raRad);
+      const y = radius * Math.sin(decRad);
+      const z = radius * Math.cos(decRad) * Math.sin(raRad);
+      return new THREE.Vector3(x, y, z);
+    }
+
+    // 🌟 별 데이터 (오리온자리 예시)
+    const stars = [
+      { name: "Betelgeuse", ra: 5.9195, dec: 7.4071 },
+      { name: "Rigel", ra: 5.2423, dec: -8.2016 },
+      { name: "Bellatrix", ra: 5.4189, dec: 6.3497 },
+      { name: "Mintaka", ra: 5.5334, dec: -0.2991 },
+      { name: "Alnilam", ra: 5.6036, dec: -1.2019 },
+      { name: "Alnitak", ra: 5.6793, dec: -1.9426 }
+    ];
+
+    // ⭐ 별 추가
+    const starGeometry = new THREE.BufferGeometry();
+    const positions = [];
+
+    stars.forEach(star => {
+      const pos = raDecToCartesian(star.ra, star.dec);
+      positions.push(pos.x, pos.y, pos.z);
+    });
+
+    starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 2 });
+    const starPoints = new THREE.Points(starGeometry, starMaterial);
+    scene.add(starPoints);
+
+    // 🏷️ 별 이름 표시 (Sprite)
+    stars.forEach(star => {
+      const pos = raDecToCartesian(star.ra, star.dec);
+      const sprite = makeTextSprite(star.name);
+      sprite.position.copy(pos.clone().multiplyScalar(1.02));  // 살짝 바깥으로
+      scene.add(sprite);
+    });
+
+    function makeTextSprite(message) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 256;
+      canvas.height = 64;
+      const context = canvas.getContext('2d');
+      context.font = '28px Arial';
+      context.fillStyle = 'white';
+      context.fillText(message, 10, 40);
+      const texture = new THREE.CanvasTexture(canvas);
+      const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+      return new THREE.Sprite(material);
+    }
+
+    // 🎥 애니메이션 루프
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    animate();
+
+    // 🔄 리사이징
+    window.addEventListener("resize", () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>

@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 # 모델 로드 (path는 실제 위치)
 model = torch.hub.load('ultralytics/yolov5', 'custom', path='model/best.pt', force_reload=True)
-model.conf = 0.25
+model.conf = 0.35
 model.iou  = 0.45
 
 print("▶ Available classes:", model.names)

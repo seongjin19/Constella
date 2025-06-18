@@ -38,7 +38,7 @@ st.markdown(f"""
 
 
 
-# ① 위치 받아오기
+# 위치 받아오기
 location = streamlit_geolocation()
 
 # ② 유효성 검사
@@ -46,7 +46,7 @@ if not location or location.get("latitude") is None or location.get("longitude")
     st.info("위치 정보를 아직 가져오지 못했습니다.\n브라우저에서 위치 사용을 허용해주세요.")
     st.stop()
 
-# ③ 위도/경도 출력
+# 위도/경도 출력
 lat = location["latitude"]
 lon = location["longitude"]
 
@@ -67,7 +67,7 @@ def reverse_geocode(latitude, longitude):
 place_name = reverse_geocode(lat, lon)
 st.write(f"**위치:** {place_name}")
 
-# ④ Skyfield 설정
+# Skyfield 설정
 ts    = load.timescale()
 t     = ts.now()
 eph   = load("de421.bsp")
@@ -75,11 +75,11 @@ earth = eph["earth"]
 topos = wgs84.latlon(lat, lon)
 observer = (earth + topos).at(t)
 
-# ⑤ 별자리 경계 및 이름 맵
+# 별자리 경계 및 이름 맵
 constellation_at = load_constellation_map()
 names_map        = dict(load_constellation_names())
 
-# ⑥ 지평선 위 보이는 별자리 계산
+# 지평선 위 보이는 별자리 계산
 visible = set()
 for ra_h in range(24):
     for dec_deg in range(-90, 91, 10):
@@ -90,7 +90,7 @@ for ra_h in range(24):
             abbr = constellation_at(astrometric)
             visible.add(abbr)
 
-# ⑦ 관심 별자리 필터
+# 관심 별자리 필터
 interest_full = [
     'Aquila','Bootes','Cassiopeia',
     'Cygnus','Gemini','Leo','Orion',
@@ -101,14 +101,14 @@ filtered = [
     if names_map.get(abbr) in interest_full
 ]
 
-# ⑧ 서버 전송용 클래스명 변환
+# 서버 전송용 클래스명 변환
 classes_to_send = [name.lower().replace(' ', '_') for name in filtered]
 
-# ⑨ 필터링 결과 출력
+# 필터링 결과 출력
 if filtered:
     st.subheader("관측 가능한 별자리")
 
-    # 별자릴 설명
+    # 별자리 설명
     constellation_info = {
         'Aquila':
             {
@@ -268,12 +268,12 @@ if filtered:
                 st.image(info['image'], use_container_width=True)
             st.write(info.get('description', '해당 별자리의 설명이 등록되어 있지 않습니다.'))
 
-    st.caption(f"서버 전송할 클래스: {classes_to_send}")
+    #st.caption(f"서버 전송할 클래스: {classes_to_send}")
 else:
     st.warning("별자리가 현재 위치에서 보이지 않습니다.")
 
-# ⑩ 이미지 업로드 및 YOLOv5 서버 호출
-st.subheader("🔭 별자리 이미지 업로드 및 탐지")
+# 이미지 업로드 및 YOLOv5 서버 호출
+st.subheader("별자리 이미지 업로드 및 탐지")
 uploaded = st.file_uploader("별자리 이미지 업로드", type=["jpg","png","jpeg"])
 if uploaded:
     img = Image.open(uploaded).convert("RGB")
